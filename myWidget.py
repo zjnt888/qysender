@@ -13,15 +13,15 @@ class QmyWidget(QWidget):
         self.ui = Ui_Form()  # 创建UI对象
         self.ui.setupUi(self)  # 构造UI界面
         self.setFixedSize(self.width(), self.height())  # 禁止拉伸窗口大小
-        self.inter_url='.//tmp//interface_data.conf'
-        self.addr_url='.//tmp//addressbook.xlsx'
+        self.inter_url = './/tmp//interface_data.conf'
+        self.addr_url = './/tmp//addressbook.xlsx'
         # 初始化
         try:
             self.df = pd.DataFrame()
             self.addressbook = pd.read_excel(self.addr_url, skiprows=8, index_col="姓名")
-            self.winxin = weixin.weixin(self.inter_url,self.addr_url)
+            self.winxin = weixin.weixin(self.inter_url, self.addr_url)
         except Exception as e:
-            msg_box = QMessageBox(QMessageBox.Warning, '警告', '程序初始化发生错误，错误代码'+repr(e)+'\n请检查相关配置文件')
+            msg_box = QMessageBox(QMessageBox.Warning, '警告', '程序初始化发生错误，错误代码' + repr(e) + '\n请检查相关配置文件')
             msg_box.exec_()
 
     #  =================自定义功能函数=================================
