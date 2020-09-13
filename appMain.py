@@ -4,7 +4,7 @@ import sys,os
 
 from PyQt5.QtWidgets import QApplication
 # from PyQt5.QtGui import  QIcon
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox,QWidget
 from myWidget import QmyWidget
 
 

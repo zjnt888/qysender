@@ -14,14 +14,17 @@ class QmyWidget(QWidget):
         self.ui = Ui_Form()  # 创建UI对象
         self.ui.setupUi(self)  # 构造UI界面
         self.setFixedSize(self.width(), self.height())  # 禁止拉伸窗口大小
-        self.inter_url = './/tmp//interface_data.conf'
+
         self.addr_url = './/tmp//addressbook.xlsx'
+        self.inter_url = './/tmp//interface_data.conf'
 
         # 初始化
         if not os.path.exists(self.addr_url):
             QMessageBox.warning(self, '警告', '没有找到联系人文件addressbook.xlsx，请检查tmp目录')
+            sys.exit()
         elif not os.path.exists(self.inter_url):
             QMessageBox.warning(self, '警告', '没有找到接口数据文件interface_data.conf，请检查tmp目录')
+            sys.exit()
         else:
             try:
                 self.df = pd.DataFrame()
@@ -85,7 +88,7 @@ class QmyWidget(QWidget):
                 usr = da['姓名']
                 res = self.winxin.send_msg(usr, msg)
                 if not res['errcode'] == '':
-                    QMessageBox.warning(self, '警告', '向' + usr + '发送信息失败！\n 错误代码：'+res['errmsg'])
+                    QMessageBox.warning(self, '警告', '向' + usr + '发送信息失败！\n 错误代码：' + res['errmsg'])
             dlgTitle = "系统消息"
             strInfo = "   发送结束！   "
             QMessageBox.about(self, dlgTitle, strInfo)
