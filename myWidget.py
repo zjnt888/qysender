@@ -1,4 +1,5 @@
 import sys
+import os
 from PyQt5.QtWidgets import (QApplication, QDialog, QFileDialog, QMessageBox, QWidget)
 from PyQt5.QtCore import pyqtSlot, QDir
 from ui_Widget import Ui_Form
@@ -15,14 +16,19 @@ class QmyWidget(QWidget):
         self.setFixedSize(self.width(), self.height())  # 禁止拉伸窗口大小
         self.inter_url = './/tmp//interface_data.conf'
         self.addr_url = './/tmp//addressbook.xlsx'
+
         # 初始化
-        try:
-            self.df = pd.DataFrame()
-            self.addressbook = pd.read_excel(self.addr_url, skiprows=8, index_col="姓名")
-            self.winxin = weixin.weixin(self.inter_url, self.addr_url)
-        except Exception as e:
-            msg_box = QMessageBox(QMessageBox.Warning, '警告', '程序初始化发生错误，错误代码' + repr(e) + '\n请检查相关配置文件')
-            msg_box.exec_()
+        if not os.path.exists(self.addr_url):
+            QMessageBox.warning(self, '警告', '没有找到联系人文件addressbook.xlsx，请检查tmp目录')
+        elif not os.path.exists(self.inter_url):
+            QMessageBox.warning(self, '警告', '没有找到接口数据文件interface_data.conf，请检查tmp目录')
+        else:
+            try:
+                self.df = pd.DataFrame()
+                self.addressbook = pd.read_excel(self.addr_url, skiprows=8, index_col="姓名")
+                self.winxin = weixin.weixin(self.inter_url, self.addr_url)
+            except Exception as e:
+                QMessageBox.warning(self, '警告', '程序初始化发生错误。\n请检查接口配置文件')
 
     #  =================自定义功能函数=================================
     # 判断数据文件中的姓名是否都能在通讯录中匹配
@@ -51,8 +57,7 @@ class QmyWidget(QWidget):
                 for i in excel_head:
                     self.ui.textBrowser.append('{' + i + '}')
             else:
-                msg_box = QMessageBox(QMessageBox.Warning, '警告', '数据文件第一个字段必须为‘姓名，请重新检查数据文件')
-                msg_box.exec_()
+                QMessageBox.warning(self, '警告', '数据文件第一个字段必须为‘姓名，请重新检查数据文件')
 
     # 更改接口参数
     @pyqtSlot()
@@ -68,22 +73,25 @@ class QmyWidget(QWidget):
             with open(self.inter_url, 'w') as f:
                 f.write(str(dic_inface))
                 f.close()
+        os.remove('.//tmp//access_token.conf')
 
     @pyqtSlot()
     def on_btnSend_clicked(self):
+        i = 0
         if self.chk_addr() == 0:
             das = self.df.to_dict(orient='records')
             for da in das:
                 msg = self.ui.plainTextEdit.toPlainText().format(**da)
                 usr = da['姓名']
-                self.winxin.send_msg(usr, msg)
+                res = self.winxin.send_msg(usr, msg)
+                if not res['errcode'] == '':
+                    QMessageBox.warning(self, '警告', '向' + usr + '发送信息失败！\n 错误代码：'+res['errmsg'])
             dlgTitle = "系统消息"
-            strInfo = "发送成功！"
+            strInfo = "   发送结束！   "
             QMessageBox.about(self, dlgTitle, strInfo)
         else:
             msg = '数据文件中有' + repr(self.chk_addr()) + '个人在通讯录中没有找到对应记录\n请检查数据文件或更新通讯录'
-            msg_box = QMessageBox(QMessageBox.Warning, '警告', msg)
-            msg_box.exec_()
+            QMessageBox.warning(self, '警告', msg)
 
     @pyqtSlot()  # "help"
     def on_btnHelp_clicked(self):

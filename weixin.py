@@ -14,17 +14,17 @@ def send_msg(self, touser, content)   发送消息
 
 class weixin(object):
     def __init__(self, inter_url, addr_url):
-        self.inter_url=inter_url
-        self.addr_url=addr_url
+        self.inter_url = inter_url
+        self.addr_url = addr_url
         self.corpid = self._get_interface_data()['corpid']
         self.secret = self._get_interface_data()['secret']
         self.agentid = self._get_interface_data()['agentid']
-#        self.addressbook = pd.read_excel('.//tmp//addressbook.xlsx', skiprows=8, index_col="姓名")
+        #        self.addressbook = pd.read_excel('.//tmp//addressbook.xlsx', skiprows=8, index_col="姓名")
         self.addressbook = pd.read_excel(self.addr_url, skiprows=8, index_col="姓名")
 
     # 获取接口数据
     def _get_interface_data(self):
-#        with open('.//tmp//interface_data.conf', 'r') as f:
+        #        with open('.//tmp//interface_data.conf', 'r') as f:
         with open(self.inter_url, 'r') as f:
             result = ast.literal_eval(f.read())
         return result
@@ -76,17 +76,20 @@ class weixin(object):
             "text": {
                 "content": content
             },
-            "safe": "1"
+            "safe": "1",
+            "enable_duplicate_check": "1"
         }
         send_msges = (bytes(json.dumps(send_values), 'utf-8'))
         response = requests.post(send_url, send_msges)
         response = response.json()
-        return response["errmsg"]
+        return response
+
 
 
 if __name__ == '__main__':
     corpid = 'ww04a727bae922b603'
     secret = 'LRscPQv4flpwOHm2t_IND9yv3GMPSsy10fVjEGZTI_Y'
     agentid = '1000016'
-    winxin = weixin('.//tmp//interface_data.conf','.//tmp//addressbook.xlsx')._get_userid('张俊')
-    print(winxin)
+    winxin = weixin('.//tmp//interface_data.conf', './/tmp//addressbook.xlsx')
+    res=winxin.send_msg('','hello')
+    print(res)
